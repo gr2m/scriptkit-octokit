@@ -1,36 +1,15 @@
 # scriptkit-octokit
 
-> An Octokit constructor with OAuth authentication for Script Kit
+> An Octokit constructor with OAuth authentication for [Script Kit](https://www.scriptkit.com/)
 
 [![@latest](https://img.shields.io/npm/v/scriptkit-octokit.svg)](https://www.npmjs.com/package/scriptkit-octokit)
 [![Build Status](https://github.com/gr2m/scriptkit-octokit/workflows/Test/badge.svg)](https://github.com/gr2m/scriptkit-octokit/actions?query=workflow%3ATest+branch%3Amain)
 
-## usage
-
-<table>
-<tbody valign=top align=left>
-<tr><th>
-
-Browsers
-
-</th><td width=100%>
-
-`scriptkit-octokit` is not meant for browser usage.
-
-</td></tr>
-<tr><th>
-
-Node
-
-</th><td>
-
-`scriptkit-octokit` is not meant for Node usage.
-
-</td></tr>
-</tbody>
-</table>
+## Usage
 
 ```js
+const { Octokit } = await npm("scriptkit-octokit");
+
 const octokit = new Octokit({
   auth: {
     // optional: set required scopes
