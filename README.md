@@ -7,26 +7,34 @@
 
 ## Usage
 
+Minimal usage
+
 ```js
 const { Octokit } = await npm("scriptkit-octokit");
 
+const octokit = new Octokit();
+
+// calling octokit.auth({ type: "oauth" }) or sending any request will
+// start the OAuth Device Flow to create a new token
+octokit.auth({ type: "oauth" });
+```
+
+With options
+
+```js
 const octokit = new Octokit({
   auth: {
-    // optional: the ClientID of your own OAuth App.
+    // The ClientID of your own OAuth App.
     // Default's to @gr2m's "Kit Auth" OAuth App
     clientId?: "34e4eac44e03b0daa82b",
-    // optional: set required scopes
+    // Set required scopes
     scopes: ["repo", "user", "notifications"],
-    // optional: set a custom environmen variable name,
+    // Set a custom environmen variable name,
     // defaults to "GITHUB_TOKEN_SCOPE1_SCOPE2_etc".
     // Set to false to not persist the token
     env: "GITHUB_TOKEN_MY_APP",
   },
 });
-
-// calling octokit.auth({ type: "oauth" }) or sending any request will
-// start the OAuth Device Flow to create a new token
-octokit.auth({ type: "oauth" });
 ```
 
 ## Contributing
