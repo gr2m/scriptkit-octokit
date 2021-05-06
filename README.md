@@ -12,6 +12,9 @@ const { Octokit } = await npm("scriptkit-octokit");
 
 const octokit = new Octokit({
   auth: {
+    // optional: the ClientID of your own OAuth App.
+    // Default's to @gr2m's "Kit Auth" OAuth App
+    clientId?: "34e4eac44e03b0daa82b",
     // optional: set required scopes
     scopes: ["repo", "user", "notifications"],
     // optional: set a custom environmen variable name,
