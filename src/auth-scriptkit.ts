@@ -1,5 +1,12 @@
 import { createOAuthDeviceAuth } from "@octokit/auth-oauth-device";
 
+declare global {
+  const copy: Function;
+  const arg: Function;
+  const cli: Function;
+  const env: Record<string, string>;
+}
+
 export type StrategyOptions = {
   /** Client ID for your OAuth app */
   clientId?: string;
@@ -23,14 +30,12 @@ export function createScriptKitAuth({
   scopes = [],
   env,
 }: StrategyOptions) {
-  const auth = createOAuthDeviceAuth({
+  const deviceAuth = createOAuthDeviceAuth({
     clientType: "oauth-app",
     clientId: clientId,
     scopes,
     onVerification(verification) {
-      // @ts-ignore copy is a global provide by kit
       copy(verification.user_code);
-      // @ts-ignore arg is a global provided by kit
       arg({
         placeholder: `Press <enter> after granting permissions`,
         ignoreBlur: true,
@@ -41,16 +46,67 @@ export function createScriptKitAuth({
     },
   });
 
-  const result = auth({ type: "oauth" });
+  const envVariableName = env || scopesToEnvName(scopes);
 
-  if (env !== false) {
-    result.then(({ token }) =>
-      // @ts-ignore cli is a global provided by kit
-      cli("set-env-var", scopesToEnvName(scopes), token)
-    );
+  return Object.assign(
+    auth.bind(null, envVariableName, clientId, scopes, deviceAuth),
+    {
+      hook: hook.bind(null, envVariableName, deviceAuth),
+    }
+  );
+}
+
+async function auth(
+  envVariableName: string,
+  clientId: string,
+  scopes: string[],
+  deviceAuth: any
+) {
+  if (env[envVariableName]) {
+    return {
+      type: "token",
+      tokenType: "oauth",
+      clientType: "oauth-app",
+      clientId,
+      token: env[envVariableName],
+      scopes,
+    };
   }
 
-  return auth;
+  const result = await deviceAuth({ type: "oauth" });
+
+  await cli("set-env-var", envVariableName, result.token);
+
+  return result;
+}
+
+function hook(
+  envVariableName: string,
+  deviceAuth: any,
+  request: any,
+  route: any,
+  parameters?: any
+): Promise<any> {
+  let endpoint = request.endpoint.merge(route as string, parameters);
+
+  // Do not intercept request to retrieve codes or token
+  if (/\/login\/(oauth\/access_token|device\/code)$/.test(endpoint.url)) {
+    return request(endpoint);
+  }
+
+  if (env[envVariableName]) {
+    endpoint.headers.authorization = `token ${env[envVariableName]}`;
+    return request(endpoint);
+  }
+
+  return deviceAuth
+    .hook(request, route, parameters)
+    .then(async (response: any) => {
+      const result = await deviceAuth({ type: "oauth" });
+      await cli("set-env-var", envVariableName, result.token);
+
+      return response;
+    });
 }
 
 function scopesToEnvName(scopes: string[]) {
