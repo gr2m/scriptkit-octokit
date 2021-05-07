@@ -22,7 +22,7 @@ export type StrategyOptions = {
   env?: string | false;
 };
 
-const DEFAULT_CLIENT_ID = "34e4eac44e03b0daa82b";
+const DEFAULT_CLIENT_ID = "149153b71e602700c2f2";
 const ENV_TOKEN_PREFIX = "GITHUB_TOKEN";
 
 export function createScriptKitAuth({
